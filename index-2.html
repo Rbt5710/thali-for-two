@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thali for Two</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EEE5; --surface:#FFFFFF; --surface2:#F3F6F0; --ink:#16211B; --muted:#56655B;
+  --line:#D3DBCF; --leaf:#1D573A; --leafInk:#FFFFFF; --prot:#B9780A; --fib:#2B7A4B;
+  --warn:#A3362A; --chip:#DFE7D9; --protBg:#FBF0DA; --fibBg:#E1F0E6;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111814; --surface:#19221D; --surface2:#1F2A24; --ink:#E4ECE6; --muted:#9AAA9F;
+    --line:#2D3A32; --leaf:#74C394; --leafInk:#0F1A14; --prot:#F0B23C; --fib:#62C287;
+    --warn:#F08A7A; --chip:#25312A; --protBg:#3A2E14; --fibBg:#18352A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111814; --surface:#19221D; --surface2:#1F2A24; --ink:#E4ECE6; --muted:#9AAA9F;
+  --line:#2D3A32; --leaf:#74C394; --leafInk:#0F1A14; --prot:#F0B23C; --fib:#62C287;
+  --warn:#F08A7A; --chip:#25312A; --protBg:#3A2E14; --fibBg:#18352A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--prot);outline-offset:2px;border-radius:6px}
+a{color:var(--leaf)}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 110px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:8px 0 18px}
+header.top h1{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+header.top p{margin:4px 0 0;color:var(--muted);font-size:.92rem}
+.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--leaf);color:var(--leafInk);font-weight:700;white-space:nowrap}
+.btn.ghost{background:transparent;color:var(--leaf);border:1.5px solid var(--leaf)}
+.btn.small{padding:6px 10px;font-size:.85rem;border-radius:8px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs .in{display:flex;max-width:760px;width:100%}
+nav.tabs button{flex:1;background:none;border:0;padding:10px 4px 12px;font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="page"]{color:var(--leaf);font-weight:700}
+.summary{background:var(--surface);border-radius:18px;padding:16px;margin-bottom:18px;border:1px solid var(--line)}
+.summary h2{font-size:1.1rem;margin-bottom:10px}
+.sumgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.sumgrid div{background:var(--surface2);border-radius:12px;padding:10px 12px}
+.sumgrid b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:1.25rem}
+.sumgrid span{font-size:.82rem;color:var(--muted)}
+.persons{width:100%;border-collapse:collapse;margin-top:12px;font-size:.9rem}
+.persons th,.persons td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
+.persons th{color:var(--muted);font-weight:400}
+.ok{color:var(--fib);font-weight:700}.short{color:var(--warn);font-weight:700}
+.day{background:var(--surface);border-radius:20px;margin-bottom:16px;border:1px solid var(--line);overflow:hidden}
+.dayhead{display:flex;align-items:center;gap:14px;padding:14px 16px 10px}
+.dayhead h3{font-size:1.35rem;font-weight:700}
+.dayhead .sub{color:var(--muted);font-size:.85rem}
+.ring{flex:none}
+.ring text{font-family:"Bricolage Grotesque",sans-serif;font-weight:700}
+.meal{border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;align-items:start}
+.meal-main{background:none;border:0;text-align:left;padding:12px 8px 12px 16px;width:100%}
+.slot{display:block;font-size:.8rem;color:var(--muted)}
+.mname{display:block;font-weight:700;line-height:1.3;margin:1px 0 5px}
+.mmeta{display:flex;flex-wrap:wrap;gap:6px;font-size:.78rem}
+.tag{padding:2px 8px;border-radius:999px;background:var(--chip)}
+.tag.p{background:var(--protBg);color:var(--prot);font-weight:700}
+.tag.f{background:var(--fibBg);color:var(--fib);font-weight:700}
+.tag.lo{background:transparent;border:1px dashed var(--muted)}
+.swap{background:none;border:0;padding:14px 16px 10px 8px;color:var(--muted)}
+.swap svg{width:22px;height:22px}
+.details{grid-column:1/-1;padding:4px 16px 16px;background:var(--surface2)}
+.details h4{margin:12px 0 6px;font-size:.9rem}
+.nut{width:100%;border-collapse:collapse;font-size:.85rem}
+.nut td,.nut th{padding:4px 6px;text-align:right;border-bottom:1px solid var(--line)}
+.nut th:first-child,.nut td:first-child{text-align:left}
+.details ul,.details ol{margin:0;padding-left:20px;font-size:.9rem}
+.note{font-size:.85rem;color:var(--muted);margin:8px 0 0}
+.hint{margin:0 16px 14px;padding:10px 12px;border-radius:12px;background:var(--protBg);font-size:.85rem}
+.hint.fib{background:var(--fibBg)}
+.section{background:var(--surface);border-radius:18px;padding:16px;margin-bottom:16px;border:1px solid var(--line)}
+.section h2{font-size:1.25rem;margin-bottom:4px}
+.section > p{margin:0 0 12px;color:var(--muted);font-size:.9rem}
+.gcat{margin:14px 0 4px;font-size:.95rem;font-family:"Bricolage Grotesque",sans-serif}
+.gitem{display:grid;grid-template-columns:auto 1fr auto;gap:8px 10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.gitem input{width:20px;height:20px;accent-color:var(--leaf)}
+.gitem .gn{line-height:1.25}
+.gitem .gq{font-size:.82rem;color:var(--muted)}
+.gitem.have .gn{text-decoration:line-through;color:var(--muted)}
+.shop{display:flex;gap:6px}
+.shop a{font-size:.75rem;text-decoration:none;padding:5px 8px;border-radius:8px;border:1px solid var(--line);color:var(--ink);background:var(--surface2);white-space:nowrap}
+.gtotal{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 4px;font-weight:700}
+.gtotal b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.4rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:6px 12px;border-radius:999px;background:var(--chip);font-size:.88rem}
+.chip.used{background:var(--leaf);color:var(--leafInk)}
+.steps{list-style:none;padding:0;margin:0}
+.steps li{padding:10px 0;border-bottom:1px solid var(--line)}
+.steps li b{display:block}
+.steps .when{font-size:.8rem;color:var(--muted)}
+.field{display:grid;gap:4px;margin-bottom:12px}
+.field label{font-size:.85rem;color:var(--muted)}
+.field input,.field select{padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;border:0;background:var(--surface2);padding:9px 6px;font-size:.9rem}
+.seg button[aria-pressed="true"]{background:var(--leaf);color:var(--leafInk);font-weight:700}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0}
+.switch input{width:22px;height:22px;accent-color:var(--leaf)}
+input[type=range]{width:100%;accent-color:var(--leaf)}
+.rangelbl{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+.person{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.person h3{font-size:1rem;margin-bottom:8px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
+.toast.show{opacity:1}
+.fine{font-size:.8rem;color:var(--muted)}
+.hint.vc{background:var(--surface2);border:1px solid var(--line)}
+.chip{border:0}.chip.fav{background:var(--prot);color:#fff}.chip.skip{text-decoration:line-through;opacity:.6}
+button.chip{cursor:pointer}
+.banner{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--protBg);border-radius:14px;padding:10px 12px;margin-bottom:14px;font-size:.9rem}
+.addon{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.addon input[type=checkbox]{width:20px;height:20px;accent-color:var(--leaf)}
+.addon .am{font-size:.8rem;color:var(--muted)}
+.addon .ctl{grid-column:2/-1;display:flex;gap:8px;flex-wrap:wrap}
+.addon .ctl select{padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface2);font-size:.85rem}
+.linkbtn{background:none;border:0;color:var(--warn);font-size:.85rem;padding:4px}
+textarea{font:inherit;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);width:100%;min-height:80px;color:inherit}
+details.more summary{cursor:pointer;color:var(--leaf);font-weight:700;padding:8px 0}
+.rate{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.rate .seg button{padding:6px 10px;font-size:.85rem}
+.banner.warn{background:var(--surface2);border:1px solid var(--warn)}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+@media (min-width:700px){
+  .sumgrid{grid-template-columns:repeat(4,1fr)}
+  header.top h1{font-size:2.5rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Thali for Two</h1>
+      <p id="subtitle"></p>
+    </div>
+    <div style="display:flex;gap:8px"><button class="btn ghost" data-act="share">Share</button><button class="btn" data-act="regen">New plan</button></div>
+  </header>
+  <main id="view"></main>
+</div>
+<nav class="tabs" aria-label="Sections"><div class="in" id="tabs"></div></nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------- helpers ---------- */
+const R=(a,b)=>{const o=[];let m=a;for(;;){o.push(m);if(m===b)break;m=m%12+1;}return o;};
+const ALL=R(1,12);
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const SLOTS=['b','l','d','s'];
+const SLOTNAME={b:'Breakfast',l:'Lunch',d:'Dinner',s:'Evening snack'};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+
+/* ---------- ingredients (price ₹ per kg / litre / piece, approx city rates) ---------- */
+const CATS={dal:'Dals, grains and atta',dairy:'Dairy and eggs',meat:'Chicken and fish',veg:'Vegetables and greens',fruit:'Fruits',nuts:'Nuts, seeds and snacks'};
+const ING={
+ moong_y:{n:'Moong dal (yellow)',cat:'dal',pr:140,q:'moong dal'},
+ moong_w:{n:'Whole green moong (for sprouts)',cat:'dal',pr:130,q:'green moong whole'},
+ besan:{n:'Besan',cat:'dal',pr:100,q:'besan'},
+ rajma:{n:'Rajma',cat:'dal',pr:160,q:'rajma'},
+ chole:{n:'Kabuli chana',cat:'dal',pr:120,q:'kabuli chana'},
+ kala:{n:'Kala chana',cat:'dal',pr:100,q:'kala chana'},
+ arhar:{n:'Arhar (toor) dal',cat:'dal',pr:160,q:'toor dal'},
+ masoor:{n:'Masoor dal',cat:'dal',pr:120,q:'masoor dal'},
+ chanadal:{n:'Chana dal',cat:'dal',pr:100,q:'chana dal'},
+ soya:{n:'Soya chunks or granules',cat:'dal',pr:160,q:'soya chunks'},
+ oats:{n:'Rolled oats',cat:'dal',pr:200,q:'rolled oats'},
+ poha:{n:'Poha',cat:'dal',pr:70,q:'poha'},
+ atta:{n:'Whole wheat atta',cat:'dal',pr:50,q:'whole wheat atta'},
+ mgatta:{n:'Multigrain atta',cat:'dal',pr:75,q:'multigrain atta'},
+ makki:{n:'Makki atta',cat:'dal',pr:80,q:'makki atta'},
+ rice:{n:'Rice',cat:'dal',pr:80,q:'rice'},
+ brice:{n:'Brown rice',cat:'dal',pr:160,q:'brown rice'},
+ bread:{n:'Whole wheat bread (slices)',cat:'dal',u:'pc',pr:3.2,q:'whole wheat bread'},
+ paneer:{n:'Paneer',cat:'dairy',pr:420,q:'paneer'},
+ curd:{n:'Curd (dahi)',cat:'dairy',pr:90,q:'curd'},
+ milk:{n:'Toned milk',cat:'dairy',u:'ml',pr:66,q:'toned milk'},
+ eggs:{n:'Eggs',cat:'dairy',u:'pc',pr:7.5,q:'eggs'},
+ chicken:{n:'Chicken (curry cut)',cat:'meat',pr:300,q:'chicken curry cut'},
+ chickenb:{n:'Chicken breast (boneless)',cat:'meat',pr:420,q:'chicken breast boneless'},
+ fish:{n:'Rohu fish',cat:'meat',pr:300,q:'rohu fish'},
+ peanuts:{n:'Peanuts',cat:'nuts',pr:160,q:'peanuts'},
+ rchana:{n:'Roasted chana',cat:'nuts',pr:140,q:'roasted chana'},
+ makhana:{n:'Makhana',cat:'nuts',pr:1100,q:'makhana'},
+ chia:{n:'Chia seeds',cat:'nuts',pr:450,q:'chia seeds'},
+ flax:{n:'Flaxseeds (alsi)',cat:'nuts',pr:250,q:'flax seeds'},
+ onion:{n:'Onion',cat:'veg',pr:35,q:'onion'},
+ tomato:{n:'Tomato',cat:'veg',pr:40,q:'tomato'},
+ cucumber:{n:'Cucumber',cat:'veg',pr:40,q:'cucumber'},
+ mint:{n:'Pudina (mint)',cat:'veg',pr:200,q:'mint leaves'},
+ coriander:{n:'Dhaniya (coriander)',cat:'veg',pr:150,q:'coriander leaves'},
+ lemon:{n:'Lemon',cat:'veg',u:'pc',pr:5,q:'lemon'},
+ gobhi:{n:'Gobhi (cauliflower)',s:'Gobhi',cat:'veg',pr:40,q:'cauliflower',m:R(10,3),sabzi:1},
+ baingan:{n:'Baingan',s:'Baingan',cat:'veg',pr:40,q:'brinjal',m:R(8,3),sabzi:1},
+ lauki:{n:'Lauki (bottle gourd)',s:'Lauki',cat:'veg',pr:35,q:'bottle gourd',m:R(3,10),sabzi:1},
+ bhindi:{n:'Bhindi',s:'Bhindi',cat:'veg',pr:60,q:'bhindi',m:R(4,9),sabzi:1},
+ tori:{n:'Tori (ridge gourd)',s:'Tori',cat:'veg',pr:50,q:'ridge gourd',m:R(4,9),sabzi:1},
+ karela:{n:'Karela',s:'Karela',cat:'veg',pr:60,q:'karela',m:R(4,8),sabzi:1},
+ cabbage:{n:'Patta gobhi (cabbage)',s:'Patta gobhi',cat:'veg',pr:30,q:'cabbage',m:R(10,3),sabzi:1},
+ beans:{n:'French beans',s:'Beans',cat:'veg',pr:70,q:'french beans',m:R(9,1),sabzi:1},
+ kaddu:{n:'Kaddu (pumpkin)',s:'Kaddu',cat:'veg',pr:30,q:'pumpkin',m:R(7,11),sabzi:1},
+ arbi:{n:'Arbi',s:'Arbi',cat:'veg',pr:60,q:'arbi',m:R(8,11),sabzi:1},
+ methi:{n:'Methi leaves',s:'Methi',cat:'veg',pr:80,q:'methi leaves',m:R(10,3),sabzi:1},
+ capsicum:{n:'Shimla mirch (capsicum)',s:'Shimla mirch',cat:'veg',pr:80,q:'capsicum',m:R(10,4),sabzi:1},
+ gajar:{n:'Gajar (red carrot)',s:'Gajar-matar',cat:'veg',pr:50,q:'carrot',m:R(11,3),sabzi:1},
+ palak:{n:'Palak (spinach)',s:'Palak',cat:'veg',pr:40,q:'spinach',m:R(10,3)},
+ matar:{n:'Matar (green peas)',s:'Matar',cat:'veg',pr:80,q:'green peas',m:R(11,2)},
+ sarson:{n:'Sarson saag',s:'Sarson',cat:'veg',pr:50,q:'sarson saag',m:R(11,2)},
+ mooli:{n:'Mooli',s:'Mooli',cat:'veg',pr:30,q:'radish',m:R(10,2),sabzi:1},
+ shakarkandi:{n:'Shakarkandi',s:'Shakarkandi',cat:'veg',pr:50,q:'sweet potato',m:R(10,1)},
+ bhutta:{n:'Bhutta (corn cob)',s:'Bhutta',cat:'veg',u:'pc',pr:20,q:'corn cob',m:R(7,10)},
+ bathua:{n:'Bathua',s:'Bathua',cat:'veg',pr:60,q:'bathua',m:R(11,2)},
+ shalgam:{n:'Shalgam (turnip)',s:'Shalgam',cat:'veg',pr:40,q:'turnip',m:R(11,1),sabzi:1},
+ chukandar:{n:'Chukandar (beetroot)',s:'Chukandar',cat:'veg',pr:50,q:'beetroot',m:R(11,3)},
+ kamal:{n:'Kamal kakdi (lotus stem)',s:'Kamal kakdi',cat:'veg',pr:200,q:'lotus stem',m:R(10,3),sabzi:1},
+ singhara:{n:'Singhara (water chestnut)',s:'Singhara',cat:'veg',pr:80,q:'water chestnut singhara',m:R(10,12)},
+ harapyaz:{n:'Hara pyaz (spring onion)',s:'Hara pyaz',cat:'veg',pr:80,q:'spring onion',m:R(11,3)},
+ amla:{n:'Amla',s:'Amla',cat:'fruit',pr:90,q:'amla',m:R(10,2)},
+ guava:{n:'Amrood (guava)',s:'guava',cat:'fruit',pr:80,q:'guava',m:R(8,2),fruit:1},
+ apple:{n:'Apple',s:'apple',cat:'fruit',pr:160,q:'apple',m:R(8,12),fruit:1},
+ pear:{n:'Nashpati (pear)',s:'pear',cat:'fruit',pr:140,q:'pear',m:R(7,10),fruit:1},
+ pomegranate:{n:'Anar (pomegranate)',s:'pomegranate',cat:'fruit',pr:200,q:'pomegranate',m:R(9,2),fruit:1},
+ papaya:{n:'Papaya',s:'papaya',cat:'fruit',pr:50,q:'papaya',m:ALL,fruit:1},
+ banana:{n:'Banana',s:'banana',cat:'fruit',pr:60,q:'banana',m:ALL,fruit:1},
+ sitaphal:{n:'Sitaphal (custard apple)',s:'sitaphal',cat:'fruit',pr:140,q:'custard apple',m:R(9,11),fruit:1},
+ mosambi:{n:'Mosambi',s:'mosambi',cat:'fruit',pr:70,q:'mosambi',m:R(10,4),fruit:1},
+ orange:{n:'Santra (orange)',s:'orange',cat:'fruit',pr:100,q:'orange',m:R(11,2),fruit:1},
+ kinnow:{n:'Kinnow',s:'kinnow',cat:'fruit',pr:60,q:'kinnow',m:R(12,3),fruit:1},
+ chiku:{n:'Chiku',s:'chiku',cat:'fruit',pr:100,q:'chiku',m:R(11,3),fruit:1},
+ strawberry:{n:'Strawberry',s:'strawberries',cat:'fruit',pr:400,q:'strawberry',m:R(12,3),fruit:1},
+ grapes:{n:'Grapes',s:'grapes',cat:'fruit',pr:120,q:'grapes',m:R(2,4),fruit:1},
+ mango:{n:'Mango',s:'mango',cat:'fruit',pr:110,q:'mango',m:R(4,7),fruit:1},
+ watermelon:{n:'Watermelon',s:'watermelon',cat:'fruit',pr:25,q:'watermelon',m:R(4,7),fruit:1},
+ muskmelon:{n:'Kharbooja (muskmelon)',s:'muskmelon',cat:'fruit',pr:40,q:'muskmelon',m:R(4,6),fruit:1},
+ litchi:{n:'Litchi',s:'litchi',cat:'fruit',pr:220,q:'litchi',m:R(5,6),fruit:1},
+ jamun:{n:'Jamun',s:'jamun',cat:'fruit',pr:200,q:'jamun',m:R(6,7),fruit:1},
+ plum:{n:'Aloo bukhara (plum)',s:'plums',cat:'fruit',pr:180,q:'plum',m:R(5,7),fruit:1},
+ peach:{n:'Aadu (peach)',s:'peach',cat:'fruit',pr:180,q:'peach',m:R(5,7),fruit:1}
+};
+/* vitamin C, mg per 100 g raw (lemon: per piece) */
+const VC={amla:600,guava:220,strawberry:59,papaya:60,orange:53,kinnow:40,mosambi:50,litchi:72,muskmelon:37,mango:36,sitaphal:36,pomegranate:10,apple:5,pear:4,banana:9,chiku:15,grapes:4,watermelon:8,jamun:18,plum:10,peach:7,
+ lemon:12,capsicum:80,tomato:14,gobhi:48,cabbage:36,palak:28,methi:50,sarson:70,matar:40,gajar:6,mooli:15,baingan:2,lauki:10,bhindi:23,tori:12,karela:84,beans:12,kaddu:9,arbi:5,shakarkandi:2,bhutta:7,bathua:35,shalgam:21,chukandar:5,kamal:44,singhara:4,harapyaz:19,onion:7,cucumber:3,mint:30,coriander:27,curd:1,milk:1};
+const VC_SRC=[{id:'amla',t:'1 amla',g:40},{id:'guava',t:'1 amrood',g:150},{id:'strawberry',t:'a bowl of strawberries',g:100},{id:'papaya',t:'a bowl of papaya',g:200},{id:'orange',t:'1 santra',g:150},{id:'kinnow',t:'1 kinnow',g:150},{id:'mosambi',t:'1 mosambi',g:150},{id:'litchi',t:'8 to 10 litchis',g:100},{id:'muskmelon',t:'a bowl of kharbooja',g:200},{id:'mango',t:'1 mango',g:150},{id:'capsicum',t:'half a capsicum, raw in salad',g:60},{id:'lemon',t:'half a lemon on dal or salad',pc:0.5}];
+const PANTRY='Oil, ghee, salt, haldi, jeera, rai, hing, red chilli, garam masala, chaat masala, kasuri methi, ginger, garlic, green chilli';
+
+/* ---------- recipes: nutrition per one plate; ing quantities for 2 standard plates ---------- */
+const RECIPES=[
+ {id:'chilla_moong',slot:'b',diet:'veg',pk:'moong',name:'Moong dal chilla with paneer filling and mint chutney',time:25,k:390,p:22,f:6,c:38,fat:13,ing:[['moong_y',120],['paneer',80],['onion',60],['tomato',60],['mint',15],['coriander',15]],soak:{type:'soak',id:'moong_y',txt:'for 4 hours or overnight'},steps:['Grind soaked dal with ginger, green chilli and salt into a pourable batter.','Spread thin on a hot tawa with a few drops of oil.','Fill with crumbled paneer, onion and tomato. Fold and serve with chutney.']},
+ {id:'chilla_besan',slot:'b',diet:'veg',pk:'besan',name:'Besan veggie chilla with curd',time:20,k:315,p:15,f:6,c:36,fat:11,ing:[['besan',100],['onion',60],['tomato',60],['$veg',80],['curd',200],['coriander',10]],steps:['Whisk besan with water, salt, ajwain and finely chopped veggies.','Cook thin chillas on a tawa with a little oil.','Serve with a bowl of curd.']},
+ {id:'oats_upma',slot:'b',diet:'veg',pk:'oats',name:'Vegetable oats upma with peanuts and curd',time:15,k:390,p:15,f:8,c:45,fat:16,ing:[['oats',100],['peanuts',30],['onion',60],['$veg',120],['curd',200]],steps:['Dry-roast oats for 2 minutes and keep aside.','Temper rai, curry leaves and peanuts; add onion and veggies.','Add oats and hot water, cook 3 minutes. Serve with curd.']},
+ {id:'sprouts_chaat',slot:'b',diet:'veg',pk:'moong',name:'Sprouts chaat with hung curd',time:10,k:260,p:15,f:8,c:32,fat:5,ing:[['moong_w',80],['onion',60],['tomato',60],['cucumber',100],['lemon',1],['curd',300]],soak:{type:'sprout',id:'moong_w'},steps:['Steam sprouts for 4 to 5 minutes (easier to digest).','Toss with onion, tomato, cucumber, lemon and chaat masala.','Serve with thick hung curd.']},
+ {id:'paneer_bhurji',slot:'b',diet:'veg',pk:'paneer',name:'Paneer bhurji with a multigrain roti',time:15,k:415,p:19,f:5,c:22,fat:25,ing:[['paneer',160],['onion',80],['tomato',100],['capsicum',60],['mgatta',60]],steps:['Saute onion, capsicum and tomato with haldi and salt.','Add crumbled paneer and cook 2 minutes.','Serve with one multigrain roti.']},
+ {id:'egg_bhurji',slot:'b',diet:'egg',pk:'egg',name:'Egg bhurji with a multigrain roti',time:15,k:380,p:22,f:5,c:24,fat:20,ing:[['eggs',6],['onion',80],['tomato',100],['capsicum',60],['mgatta',60]],steps:['Saute onion, capsicum and tomato.','Add beaten eggs and scramble on low heat.','Serve with one multigrain roti.']},
+ {id:'overnight_oats',slot:'b',diet:'veg',pk:'oats',name:'Overnight oats with chia and {fruit}',time:5,k:420,p:15,f:11,c:62,fat:11,ing:[['oats',100],['milk',400],['chia',20],['$fruit',200]],soak:{type:'oats',id:'oats'},steps:['Night before: mix oats, milk and chia in two jars and refrigerate.','Morning: top with chopped fruit. No cooking.']},
+ {id:'poha',slot:'b',diet:'veg',pk:'poha',name:'Poha with peanuts and sprouts',time:15,k:385,p:12,f:6,c:55,fat:13,ing:[['poha',100],['peanuts',30],['moong_w',40],['onion',60],['lemon',1]],soak:{type:'sprout',id:'moong_w'},steps:['Rinse poha and drain.','Temper rai, peanuts, onion and haldi; add sprouts for 2 minutes.','Fold in poha, finish with lemon and coriander.']},
+ {id:'omelette',slot:'b',diet:'egg',pk:'egg',name:'Masala omelette, whole wheat toast and {fruit}',time:10,k:400,p:18,f:7,c:48,fat:14,ing:[['eggs',4],['bread',4],['onion',40],['tomato',40],['$fruit',300]],steps:['Beat eggs with onion, tomato, chilli and salt.','Cook omelette; toast the bread.','Have the fruit on the side.']},
+ {id:'mooli_paratha',slot:'b',diet:'veg',pk:'atta',name:'Mooli paratha with curd',time:30,k:400,p:13,f:9,c:55,fat:13,m:R(11,2),ing:[['mgatta',140],['mooli',200],['curd',300]],steps:['Grate mooli, squeeze out water (use it in the dough).','Mix with ajwain, chilli and salt; stuff and roll.','Cook with a little ghee. Serve with curd.']},
+ {id:'bathua_paratha',slot:'b',diet:'veg',pk:'atta',name:'Bathua paratha with curd',time:25,k:390,p:14,f:9,c:52,fat:13,m:R(11,2),ing:[['mgatta',140],['bathua',150],['curd',300]],steps:['Boil bathua 3 minutes, chop fine.','Knead into multigrain dough with ajwain and salt.','Roll and cook with a little ghee.']},
+ {id:'gobhi_paratha',slot:'b',diet:'veg',pk:'atta',name:'Gobhi paratha with curd',time:30,k:410,p:14,f:9,c:55,fat:14,m:R(10,3),ing:[['mgatta',140],['gobhi',150],['curd',300]],steps:['Grate gobhi, squeeze lightly, mix with salt, ajwain and chilli.','Stuff into multigrain dough and roll.','Cook with a little ghee. Serve with curd.']},
+ {id:'methi_thepla',slot:'b',diet:'veg',pk:'atta',name:'Methi thepla with curd',time:25,k:380,p:13,f:8,c:52,fat:13,m:R(10,3),ing:[['mgatta',120],['besan',30],['methi',100],['curd',300]],steps:['Knead atta, besan, chopped methi, curd and spices into dough.','Roll thin and cook on tawa with little oil.','Make a double batch: theplas keep 2 days.']},
+
+ {id:'rajma',slot:'m',diet:'veg',pk:'rajma',name:'Rajma, brown rice, salad and raita',time:40,k:510,p:19,f:11,c:78,fat:10,ing:[['rajma',100],['brice',100],['onion',100],['tomato',150],['cucumber',150],['curd',200]],soak:{type:'soak',id:'rajma',txt:'overnight'},steps:['Pressure-cook soaked rajma 5 to 6 whistles.','Add to onion-tomato masala and simmer 10 minutes.','Serve with brown rice, salad and raita.']},
+ {id:'chole',slot:'m',diet:'veg',pk:'chole',name:'Chole, 2 roti and onion-cucumber salad',time:40,k:480,p:17,f:14,c:72,fat:11,ing:[['chole',100],['atta',120],['onion',100],['tomato',150],['cucumber',150]],soak:{type:'soak',id:'chole',txt:'overnight'},steps:['Pressure-cook soaked chana 5 whistles.','Simmer in onion-tomato masala with chole masala.','Serve with roti and salad.']},
+ {id:'dal_sabzi',slot:'m',diet:'veg',pk:'dal',name:'Mixed dal tadka, 2 roti and {veg} sabzi',time:35,k:520,p:21,f:15,c:78,fat:13,ing:[['arhar',60],['masoor',40],['atta',120],['$veg',300],['onion',60],['tomato',100]],steps:['Pressure-cook both dals together, 3 whistles.','Temper with jeera, garlic and tomato.','Make a simple dry sabzi while the dal cooks.']},
+ {id:'palak_paneer',slot:'m',diet:'veg',pk:'paneer',name:'Palak paneer with 2 roti',time:30,k:545,p:27,f:11,c:50,fat:26,m:R(10,3),ing:[['paneer',160],['palak',400],['onion',80],['tomato',100],['atta',120]],steps:['Blanch palak 2 minutes, cool and blend.','Cook onion-tomato masala, add palak puree.','Add paneer cubes, simmer 3 minutes.']},
+ {id:'soya_pulao',slot:'m',diet:'veg',pk:'soya',name:'Soya chunk veg pulao with cucumber raita',time:25,k:470,p:25,f:7,c:62,fat:11,ing:[['soya',60],['rice',100],['$veg',150],['onion',60],['curd',300],['cucumber',100]],steps:['Soak soya chunks in hot water 10 minutes, squeeze.','Cook rice, soya and veggies with whole spices in the cooker, 2 whistles.','Serve with cucumber raita.']},
+ {id:'lauki_chanadal',slot:'m',diet:'veg',pk:'dal',name:'Lauki chana dal with 2 roti',time:30,k:460,p:18,f:14,c:72,fat:9,m:R(3,10),ing:[['chanadal',100],['lauki',300],['tomato',100],['atta',120]],steps:['Pressure-cook chana dal and lauki together, 4 whistles.','Temper with jeera, hing and tomato.','Serve with roti.']},
+ {id:'paneer_tikka',slot:'m',diet:'veg',pk:'paneer',name:'Tawa paneer tikka, 1 roti and a big salad',time:30,k:535,p:24,f:7,c:30,fat:32,ing:[['paneer',200],['capsicum',150],['onion',150],['curd',100],['atta',60],['cucumber',200]],steps:['Coat paneer, capsicum and onion in spiced curd.','Cook on a hot tawa or air fryer until charred.','Serve with a roti and a large salad.']},
+ {id:'khichdi',slot:'m',diet:'veg',pk:'moong',name:'Moong dal vegetable khichdi with curd',time:25,k:470,p:21,f:9,c:70,fat:10,ing:[['moong_y',100],['rice',80],['$veg',200],['curd',300]],steps:['Wash dal and rice together.','Pressure-cook with veggies, haldi and salt, 3 whistles.','Finish with a ghee-jeera tadka. Serve with curd.']},
+ {id:'saag',slot:'m',diet:'veg',pk:'greens',name:'Sarson ka saag, makki roti and chaas',time:50,k:560,p:21,f:15,c:70,fat:22,m:R(11,2),ing:[['sarson',400],['palak',200],['makki',160],['curd',300]],steps:['Pressure-cook chopped sarson and palak with a little makki atta.','Mash, then temper with garlic and ghee.','Saag keeps 3 days: cook a big batch once.']},
+ {id:'egg_curry',slot:'m',diet:'egg',pk:'egg',name:'Egg curry with 2 roti and salad',time:30,k:520,p:26,f:9,c:50,fat:24,ing:[['eggs',6],['onion',120],['tomato',150],['atta',120],['cucumber',150]],steps:['Boil eggs 10 minutes and peel.','Cook onion-tomato masala, add eggs and water.','Simmer 8 minutes. Serve with roti.']},
+ {id:'chicken_curry',slot:'m',diet:'nonveg',pk:'chicken',name:'Home-style chicken curry, 2 roti and salad',time:45,k:540,p:38,f:9,c:50,fat:20,ing:[['chicken',300],['onion',150],['tomato',150],['curd',100],['atta',120],['cucumber',150]],steps:['Brown onions, add ginger-garlic and tomato.','Add chicken and curd, cook covered 25 minutes.','Serve with roti and salad.']},
+ {id:'fish_curry',slot:'m',diet:'nonveg',pk:'fish',name:'Rohu fish curry, rice and salad',time:30,k:400,p:25,f:5,c:50,fat:11,ing:[['fish',300],['rice',100],['onion',100],['tomato',150],['cucumber',200]],steps:['Rub fish with haldi and salt; shallow-fry lightly.','Simmer in onion-tomato gravy 8 minutes.','Serve with rice and salad.']},
+ {id:'chicken_tikka',slot:'m',diet:'nonveg',pk:'chicken',name:'Chicken tikka with dal and salad',time:30,k:400,p:46,f:6,c:25,fat:14,ing:[['chickenb',250],['curd',100],['arhar',60],['cucumber',200],['onion',100],['lemon',1]],soak:{type:'marinate',id:'chickenb'},steps:['Marinated chicken goes in a hot pan, air fryer or oven, 15 to 18 minutes.','Cook a thin dal alongside.','Serve with lots of salad.']},
+ {id:'kala_chana',slot:'m',diet:'veg',pk:'chana',name:'Kala chana masala with 2 roti',time:40,k:470,p:17,f:17,c:74,fat:9,ing:[['kala',100],['onion',100],['tomato',150],['atta',120]],soak:{type:'soak',id:'kala',txt:'overnight'},steps:['Pressure-cook soaked kala chana 6 whistles.','Simmer in onion-tomato masala.','Serve with roti.']},
+ {id:'gobhi_matar',slot:'m',diet:'veg',pk:'dal',name:'Gobhi matar, arhar dal and 2 roti',time:35,k:520,p:22,f:17,c:78,fat:12,m:R(11,2),ing:[['gobhi',300],['matar',150],['arhar',80],['atta',120],['tomato',100]],steps:['Pressure-cook dal, 3 whistles.','Cook gobhi and matar dry with jeera and haldi.','Serve with roti.']},
+ {id:'matar_paneer',slot:'m',diet:'veg',pk:'paneer',name:'Matar paneer with 2 roti and salad',time:30,k:540,p:25,f:12,c:52,fat:24,m:R(11,2),ing:[['paneer',160],['matar',200],['onion',100],['tomato',150],['atta',120],['cucumber',150]],steps:['Cook onion-tomato masala.','Add fresh matar and a little water, simmer 8 minutes.','Add paneer, simmer 3 minutes.']},
+ {id:'chana_bowl',slot:'m',diet:'veg',pk:'chole',name:'Chana-paneer salad bowl (good for tiffin)',time:25,k:440,p:20,f:10,c:40,fat:22,ing:[['chole',80],['paneer',100],['cucumber',200],['tomato',150],['onion',80],['peanuts',20],['lemon',1]],soak:{type:'soak',id:'chole',txt:'overnight'},steps:['Pressure-cook soaked chana 5 whistles and cool.','Toss with paneer cubes, chopped veggies, peanuts, lemon and chaat masala.','Packs well for office.']},
+ {id:'paneer_wrap',slot:'m',diet:'veg',pk:'paneer',name:'Paneer veggie wrap with mint dip',time:20,k:540,p:25,f:10,c:52,fat:25,ing:[['atta',120],['paneer',160],['capsicum',100],['onion',80],['cabbage',100],['curd',100],['mint',10]],steps:['Saute paneer strips with capsicum and onion.','Roll into roti with shredded cabbage.','Dip: curd blended with mint.']},
+ {id:'baingan',slot:'m',diet:'veg',pk:'dal',name:'Arhar dal, jeera rice and baingan bharta',time:40,k:470,p:17,f:12,c:80,fat:9,m:R(8,3),ing:[['arhar',100],['rice',100],['baingan',400],['onion',80],['tomato',100]],steps:['Roast baingan directly on the flame, peel and mash.','Cook with onion, tomato and spices.','Dal and rice go together in the cooker (pot-in-pot).']},
+ {id:'soya_keema',slot:'m',diet:'veg',pk:'soya',name:'Soya keema matar with 2 roti',time:30,k:470,p:31,f:15,c:60,fat:9,ing:[['soya',80],['matar',100],['onion',100],['tomato',150],['atta',120]],steps:['Soak soya granules in hot water 10 minutes, squeeze.','Cook in onion-tomato masala with matar (frozen is fine).','Serve with roti.']},
+ {id:'methi_dal',slot:'m',diet:'veg',pk:'moong',name:'Methi moong dal with 2 roti',time:30,k:470,p:23,f:15,c:72,fat:7,m:R(10,3),ing:[['moong_y',100],['methi',200],['tomato',100],['atta',120]],steps:['Pressure-cook moong dal, 2 whistles.','Saute chopped methi with garlic, add to dal.','Serve with roti.']},
+ {id:'bhindi',slot:'m',diet:'veg',pk:'dal',name:'Bhindi masala, masoor dal and 2 roti',time:35,k:490,p:22,f:17,c:70,fat:12,m:R(4,9),ing:[['bhindi',300],['masoor',100],['atta',120],['onion',80]],steps:['Cook masoor dal, 3 whistles.','Stir-fry bhindi with onion and amchur until dry.','Serve with roti.']},
+
+ {id:'chana_fruit',slot:'s',diet:'veg',pk:'chana',name:'Roasted chana and {fruit}',time:2,k:240,p:9,f:8,c:40,fat:2,ing:[['rchana',80],['$fruit',300]],steps:['No cooking. Keep a jar of roasted chana at work.']},
+ {id:'curd_bowl',slot:'s',diet:'veg',pk:'curd',name:'Hung curd with {fruit} and flaxseed',time:5,k:235,p:9,f:6,c:25,fat:9,ing:[['curd',400],['$fruit',200],['flax',20]],steps:['Top thick curd with chopped fruit and roasted ground flaxseed.']},
+ {id:'makhana',slot:'s',diet:'veg',pk:'nuts',name:'Roasted makhana and peanuts',time:5,k:210,p:7,f:3,c:18,fat:12,ing:[['makhana',40],['peanuts',40]],steps:['Roast a week\'s batch on Sunday in a teaspoon of ghee; store airtight.']},
+ {id:'sprouts_bhel',slot:'s',diet:'veg',pk:'moong',name:'Sprouts bhel',time:10,k:175,p:10,f:7,c:26,fat:2,ing:[['moong_w',60],['onion',40],['tomato',60],['cucumber',80],['rchana',30],['lemon',1]],soak:{type:'sprout',id:'moong_w'},steps:['Mix sprouts, chopped veggies, roasted chana, lemon and chaat masala.']},
+ {id:'chaas_fruit',slot:'s',diet:'veg',pk:'curd',name:'Masala chaas and {fruit}',time:3,k:180,p:6,f:6,c:25,fat:4,ing:[['curd',300],['$fruit',300]],steps:['Blend curd with water, roasted jeera, salt and mint.']},
+ {id:'boiled_eggs',slot:'s',diet:'egg',pk:'egg',name:'Boiled eggs with cucumber',time:12,k:150,p:12,f:1,c:4,fat:10,ing:[['eggs',4],['cucumber',200]],steps:['Boil a batch for 2 days; they keep in the fridge.']},
+ {id:'paneer_chaat',slot:'s',diet:'veg',pk:'paneer',name:'Paneer cube chaat',time:5,k:195,p:11,f:1,c:5,fat:14,ing:[['paneer',120],['cucumber',100],['tomato',60]],steps:['Toss paneer cubes with veggies, lemon and chaat masala.']},
+ {id:'shakarkandi_chaat',slot:'s',diet:'veg',pk:'shakarkandi',name:'Roasted shakarkandi chaat',time:10,k:210,p:6,f:6,c:40,fat:2,m:R(10,1),ing:[['shakarkandi',300],['rchana',30],['lemon',1]],steps:['Boil or roast shakarkandi (do a batch in the cooker).','Cube, toss with roasted chana, lemon and chaat masala.']},
+ {id:'bhutta_chaat',slot:'s',diet:'veg',pk:'bhutta',name:'Bhutta chaat with lemon',time:10,k:200,p:6,f:5,c:38,fat:3,m:R(7,10),ing:[['bhutta',2],['onion',40],['tomato',60],['lemon',1]],steps:['Pressure-cook or roast bhutta, strip kernels.','Toss with onion, tomato, lemon and chaat masala.']},
+ {id:'winter_salad',slot:'s',diet:'veg',pk:'chana',name:'Mooli, gajar and chukandar salad with roasted chana',time:10,k:190,p:8,f:8,c:30,fat:2,m:R(11,2),ing:[['mooli',150],['gajar',150],['chukandar',100],['rchana',60],['lemon',1]],steps:['Grate mooli, gajar and chukandar.','Toss with roasted chana, lemon, salt and black pepper.']},
+ {id:'haldi_milk',slot:'s',diet:'veg',pk:'milk',name:'Haldi milk and a handful of peanuts',time:5,k:230,p:11,f:2,c:18,fat:12,ing:[['milk',400],['peanuts',30]],steps:['Warm milk with a pinch of haldi and pepper.']}
+];
+/* ---------- state ---------- */
+const KEY='thali2:v2';
+const PRESET_ADDONS=[
+ {id:'whey',name:'Whey protein, 1 scoop',p:24,f:0,k:120,vc:0,cost:70,g:30,who:'both',per:1,on:false,q:'whey protein'},
+ {id:'amla',name:'Amla, 1 fruit (raw, juice or chutney)',p:0,f:1.5,k:20,vc:200,cost:4,who:'both',per:1,on:false,q:'amla',m:R(10,2)},
+ {id:'almond',name:'Soaked almonds, 8 to 10',p:2.5,f:1.5,k:70,vc:0,cost:12,g:12,who:'both',per:1,on:false,q:'almonds'},
+ {id:'chia',name:'Chia seeds, 1 tbsp in water or curd',p:2,f:4,k:60,vc:0,cost:5,g:10,who:'both',per:1,on:false,q:'chia seeds'},
+ {id:'flaxadd',name:'Ground flaxseed, 1 tbsp',p:2,f:3,k:55,vc:0,cost:3,g:10,who:'both',per:1,on:false,q:'flax seeds'}
+];
+const DEF={diet:'veg',month:new Date().getMonth()+1,cap:30,save:0.5,leftover:true,
+  a:{name:'Rajat',w:75,g:1.2,fib:30,vc:80,f:1},b:{name:'Partner',w:60,g:1.2,fib:25,vc:65,f:0.8},
+  addons:PRESET_ADDONS, prefs:{}, blocked:{}, liked:{}, custom:[]};
+let S, P, CHECK={}, TAB='plan', OPEN=null, DIRTY=false, RX={}, ALLR=[], PENDING=null;
+let STORE_OK=true; try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}catch(e){STORE_OK=false;}
+const clone=o=>JSON.parse(JSON.stringify(o));
+function buildRecipes(){
+  ALLR=RECIPES.concat((S.custom||[]).map(c=>({...c,custom:true,ing:[],pk:c.id,steps:c.steps||[]})));
+  RX=Object.fromEntries(ALLR.map(r=>[r.id,r]));
+}
+function load(){
+  let d=null;
+  try{d=JSON.parse(localStorage.getItem(KEY)||'null')||JSON.parse(localStorage.getItem('thali2:v1')||'null');}catch(e){}
+  S=clone(DEF);
+  if(d&&d.S){
+    Object.assign(S,d.S); S.a={...DEF.a,...d.S.a}; S.b={...DEF.b,...d.S.b};
+    S.addons=d.S.addons||clone(PRESET_ADDONS); S.prefs=d.S.prefs||{}; S.blocked=d.S.blocked||{}; S.liked=d.S.liked||{}; S.custom=d.S.custom||[];
+    P=d.P; CHECK=d.CHECK||{};
+  }
+  buildRecipes();
+  if(!P||!P.days||P.days.some(x=>!x||SLOTS.some(k=>!x[k]||!RX[x[k].rid]))) generate();
+}
+function save(touch){ if(touch!==false&&P) P.t=Date.now(); try{localStorage.setItem(KEY,JSON.stringify({S,P,CHECK}));}catch(e){}}
+function mondayISO(){const d=new Date();const day=d.getDay();const diff=day===0?1:day===6?2:1-day;d.setDate(d.getDate()+diff);return d.toISOString().slice(0,10);}
+function weekLabel(iso){if(!iso)return '';const d=new Date(iso+'T00:00:00');return d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3);}
+/* ---------- sharing via link ---------- */
+const b64u={enc:bytes=>{let s='';for(let i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');},
+ dec:str=>{str=str.replace(/-/g,'+').replace(/_/g,'/');const s=atob(str);return Uint8Array.from(s,c=>c.charCodeAt(0));}};
+async function packState(){
+  const days=P.days.map(day=>SLOTS.map(k=>{const it=day[k];return [it.rid,it.veg||0,it.fruit||0,it.leftover?1:0];}));
+  const bytes=new TextEncoder().encode(JSON.stringify({v:1,S,days,week:P.week,t:P.t,CHECK}));
+  if(window.CompressionStream){const st=new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));return 'z'+b64u.enc(new Uint8Array(await new Response(st).arrayBuffer()));}
+  return 'j'+b64u.enc(bytes);
+}
+async function unpack(str){
+  let raw=b64u.dec(str.slice(1));
+  if(str[0]==='z'){const st=new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));raw=new Uint8Array(await new Response(st).arrayBuffer());}
+  return JSON.parse(new TextDecoder().decode(raw));
+}
+function applyShared(o){
+  const n=clone(DEF); Object.assign(n,o.S); n.a={...DEF.a,...o.S.a}; n.b={...DEF.b,...o.S.b};
+  ['addons','prefs','blocked','liked','custom'].forEach(k=>{if(!o.S[k]) n[k]=clone(DEF[k]);});
+  S=n; buildRecipes();
+  P={seed:0,week:o.week,t:o.t,days:o.days.map(arr=>{const day={};SLOTS.forEach((k,i)=>{const [rid,veg,fruit,lo]=arr[i];day[k]={rid};if(veg)day[k].veg=veg;if(fruit)day[k].fruit=fruit;if(lo)day[k].leftover=true;});return day;})};
+  CHECK=o.CHECK||{}; OPEN=null; DIRTY=false;
+  if(P.days.some(x=>SLOTS.some(k=>!RX[x[k].rid]))) generate(); else save(false);
+}
+async function checkHash(){
+  const m=location.hash.match(/^#p=(.+)$/); if(!m) return;
+  try{
+    const o=await unpack(m[1]);
+    if(!P||!P.t||(o.t||0)>=P.t){applyShared(o);toast('Shared plan loaded');} else PENDING=o;
+  }catch(e){toast('Could not read the shared link');}
+  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+  render();
+}
+async function share(){
+  try{
+    const url=location.origin+location.pathname+'#p='+await packState();
+    const text='Our Thali for Two plan, week of '+weekLabel(P.week);
+    if(navigator.share){try{await navigator.share({title:'Thali for Two',text,url});return;}catch(e){if(e.name==='AbortError')return;}}
+    if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(url);toast('Link copied. Send it on WhatsApp');} else fallbackCopy(url);
+  }catch(e){toast('Could not create the link');}
+}
+
+/* ---------- planning ---------- */
+const dietOK=(r,d)=>d==='nonveg'||r.diet==='veg'||(d==='egg'&&r.diet==='egg');
+const inSeason=id=>{const g=ING[id]; if(S.prefs[id]===-1) return false; return !g.m||g.m.includes(S.month)||S.prefs[id]===1;};
+function recipeOK(r){
+  if(S.blocked[r.id]) return false;
+  if(r.ing.some(([id])=>ING[id]&&S.prefs[id]===-1)) return false;
+  if(!r.m||r.m.includes(S.month)) return true;
+  return r.ing.some(([id])=>ING[id]&&ING[id].m&&S.prefs[id]===1);
+}
+function costPerPlate(r,it){
+  if(r.custom) return +r.cost||0;
+  let c=0; r.ing.forEach(([id,q])=>{const real=id==='$veg'?(it&&it.veg)||'cabbage':id==='$fruit'?(it&&it.fruit)||'banana':id; const g=ING[real]; c+=(g.u==='pc'?q*g.pr:q/1000*g.pr);});
+  return c/2;
+}
+function vcOf(r,it){
+  if(r.custom) return +r.vc||0;
+  let v=0; r.ing.forEach(([id,q])=>{const real=id==='$veg'?it.veg:id==='$fruit'?it.fruit:id; if(!real||!VC[real])return; const g=ING[real];
+    if(g.u==='pc') v+=q*VC[real]/2; else v+=(q/2)*VC[real]/100*(g.cat==='fruit'||real==='cucumber'||real==='mint'?1:(r.slot==='s'?0.9:0.5));});
+  return Math.round(v);
+}
+function pickProduce(kind,days,d){
+  const flag=kind==='veg'?'sabzi':'fruit';
+  let list=Object.keys(ING).filter(id=>ING[id][flag]&&inSeason(id));
+  if(S.save>0.65){const cheap=list.filter(id=>ING[id].pr<=150); if(cheap.length) list=cheap;}
+  const near=new Set();
+  days.forEach((day,i)=>{if(!day||Math.abs(i-d)>1)return; SLOTS.forEach(k=>{const it=day[k]; if(it&&it[kind]) near.add(it[kind]);});});
+  let pool=list.filter(x=>!near.has(x)); if(!pool.length) pool=list;
+  if(!pool.length) return kind==='veg'?'cabbage':'banana';
+  const w=pool.map(x=>S.prefs[x]===1?3:1), tot=w.reduce((a,b)=>a+b,0); let r=Math.random()*tot;
+  for(let i=0;i<pool.length;i++){r-=w[i]; if(r<=0) return pool[i];}
+  return pool[0];
+}
+function targets(p){return {p:Math.round(p.w*p.g), f:p.fib, vc:p.vc};}
+function activeAddons(key){return (S.addons||[]).filter(a=>a.on&&(a.who==='both'||a.who===key)&&(!a.m||a.m.includes(S.month)));}
+function addonTotals(key){return activeAddons(key).reduce((t,a)=>{t.p+=a.p*a.per;t.f+=a.f*a.per;t.k+=a.k*a.per;t.vc+=a.vc*a.per;return t;},{p:0,f:0,k:0,vc:0});}
+function pickFor(days,d,k,rng,exclude){
+  const slot=k==='b'?'b':k==='s'?'s':'m';
+  const wk=d<5;
+  let cap=slot==='b'?Math.min(S.cap,20):slot==='s'?15:S.cap;
+  if(k==='l'&&S.leftover&&d===0) cap=Math.min(cap,25);
+  let c=ALLR.filter(r=>r.slot===slot&&dietOK(r,S.diet)&&recipeOK(r)&&r.id!==exclude);
+  if(!c.length) c=ALLR.filter(r=>r.slot===slot&&dietOK(r,S.diet)&&r.id!==exclude);
+  let c2=wk?c.filter(r=>r.time<=cap):c; if(!c2.length) c2=c;
+  const used={},last={}; let nonveg=0;
+  days.forEach((day,i)=>{if(!day)return; SLOTS.forEach(kk=>{ if(i===d&&kk===k)return; const it=day[kk]; if(!it)return;
+    used[it.rid]=(used[it.rid]||0)+1;
+    if(last[it.rid]===undefined||Math.abs(i-d)<Math.abs(last[it.rid]-d)) last[it.rid]=i;
+    if(RX[it.rid].diet==='nonveg'&&!it.leftover) nonveg++; });});
+  const today=days[d]||{};
+  const pks=SLOTS.filter(kk=>kk!==k&&today[kk]).map(kk=>RX[today[kk].rid].pk);
+  let gapP=0,gapF=0;
+  if(slot==='s'){
+    const t=['b','l','d'].reduce((a,kk)=>{const it=today[kk]; if(it){a.p+=RX[it.rid].p;a.f+=RX[it.rid].f;} return a;},{p:0,f:0});
+    const gp=key=>{const tg=targets(S[key]),ad=addonTotals(key);return [(tg.p-ad.p)/S[key].f-t.p,(tg.f-ad.f)/S[key].f-t.f];};
+    const A=gp('a'),B=gp('b'); gapP=Math.max(A[0],B[0]); gapF=Math.max(A[1],B[1]);
+  }
+  let best=null,bs=-1e9;
+  c2.forEach(r=>{
+    let sc=r.p*1.2+r.f*1.6+rng()*12;
+    sc-=costPerPlate(r)*(0.04+0.4*S.save);
+    sc-=(used[r.id]||0)*(10+22*(1-S.save));
+    if(last[r.id]!==undefined&&Math.abs(d-last[r.id])<=1) sc-=35;
+    if(pks.includes(r.pk)) sc-=25;
+    if(r.m) sc+=6;
+    if(r.custom) sc+=(used[r.id]?6:30);
+    if(S.liked[r.id]) sc+=16;
+    if(r.ing.some(([id])=>S.prefs[id]===1)) sc+=10;
+    if(r.diet==='nonveg'){sc+=3; if(nonveg>=4) sc-=45;}
+    if(slot==='s'){ if(gapP>10) sc+=r.p*3; else sc-=r.p*0.5; if(gapF>6) sc+=r.f*2; }
+    if(sc>bs){bs=sc;best=r;}
+  });
+  const it={rid:best.id};
+  if(best.ing.some(x=>x[0]==='$veg')) it.veg=pickProduce('veg',days,d);
+  if(best.ing.some(x=>x[0]==='$fruit')) it.fruit=pickProduce('fruit',days,d);
+  return it;
+}
+function generate(){
+  const seed=(Math.random()*1e9)|0, rng=mulberry32(seed);
+  const days=[];
+  for(let d=0;d<7;d++){
+    days[d]={};
+    SLOTS.forEach(k=>{
+      if(k==='l'&&S.leftover&&d>0) days[d].l={...days[d-1].d,leftover:true};
+      else days[d][k]=pickFor(days,d,k,rng);
+    });
+  }
+  P={seed,days,week:mondayISO()}; CHECK={}; OPEN=null; DIRTY=false; save();
+}
+function swap(d,k,silent){
+  const days=P.days, cur=days[d][k];
+  const it=pickFor(days,d,k,Math.random,cur.leftover?null:cur.rid);
+  days[d][k]=it;
+  if(k==='d'&&S.leftover&&d<6&&days[d+1].l&&days[d+1].l.leftover) days[d+1].l={...it,leftover:true};
+  if(k==='l'&&cur.leftover){} // lunch now cooked fresh
+  save(); render(); if(!silent) toast('Swapped '+SLOTNAME[k].toLowerCase());
+}
+
+/* ---------- calculations ---------- */
+const mealName=it=>{const r=RX[it.rid];return r.name.replace('{veg}',it.veg?ING[it.veg].s:'seasonal').replace('{fruit}',it.fruit?ING[it.fruit].s:'fruit');};
+function multFor(d,k){ let m=(S.a.f+S.b.f)/2; if(k==='d'&&P.days[d+1]&&P.days[d+1].l&&P.days[d+1].l.leftover) m*=2; return m; }
+function resolve(id,it){return id==='$veg'?it.veg:id==='$fruit'?it.fruit:id;}
+function fmtQty(id,q){
+  const u=ING[id].u||'g';
+  if(u==='pc') return Math.ceil(q-0.01)+(id==='eggs'?' eggs':id==='bread'?' slices':' pcs');
+  if(u==='ml') return q>=1000?(Math.round(q/250)/4)+' L':Math.max(50,Math.round(q/50)*50)+' ml';
+  return q>=1000?(Math.round(q/100)/10)+' kg':Math.max(25,Math.round(q/25)*25)+' g';
+}
+const priceOf=(id,q)=>{const g=ING[id];return g.u==='pc'?q*g.pr:q/1000*g.pr;};
+function dayMeals(day){const t={p:0,f:0,k:0,c:0,fat:0,vc:0,time:0};SLOTS.forEach(k=>{const it=day[k];const r=RX[it.rid];t.p+=r.p;t.f+=r.f;t.k+=r.k;t.c+=+r.c||0;t.fat+=+r.fat||0;t.vc+=vcOf(r,it);if(!it.leftover)t.time+=r.time;});return t;}
+function personDay(t,key){const f=S[key].f,a=addonTotals(key);return {p:t.p*f+a.p,f:t.f*f+a.f,k:t.k*f+a.k,vc:t.vc*f+a.vc};}
+function parseIng(line){
+  const m=line.trim().match(/^(.*?)[,:\-]?\s+([\d.]+)\s*(kg|g|ml|l|ltr|pcs?|pieces?|nos?)?\.?$/i);
+  if(!m) return {name:line.trim(),qty:null,unit:''};
+  let u=(m[3]||'').toLowerCase(); if(/^p|^n/.test(u)) u='pcs'; if(u==='ltr') u='l';
+  return {name:m[1].trim().replace(/[,:\-]$/,''),qty:parseFloat(m[2]),unit:u};
+}
+function groceries(){
+  const tot={}, custom={};
+  P.days.forEach((day,d)=>SLOTS.forEach(k=>{const it=day[k]; if(it.leftover)return; const m=multFor(d,k); const r=RX[it.rid];
+    if(r.custom){(r.ingC||[]).forEach(x=>{const key=(x.name+'|'+x.unit).toLowerCase(); const c=custom[key]=custom[key]||{name:x.name,unit:x.unit,qty:0,hasQty:x.qty!=null}; if(x.qty!=null) c.qty+=x.qty*m;}); return;}
+    r.ing.forEach(([id,q])=>{const real=resolve(id,it); tot[real]=(tot[real]||0)+q*m;});}));
+  let customCost=0; P.days.forEach((day,d)=>SLOTS.forEach(k=>{const it=day[k]; const r=RX[it.rid]; if(r.custom&&!it.leftover) customCost+=costPerPlate(r)*multFor(d,k)*2;}));
+  const adds=[]; (S.addons||[]).forEach(a=>{ if(!a.on||(a.m&&!a.m.includes(S.month)))return; const n=7*a.per*(a.who==='both'?2:1); adds.push({a,n,cost:n*a.cost}); });
+  return {tot,custom:Object.values(custom),customCost,adds};
+}
+function fmtCustomQty(c){ if(!c.hasQty) return 'as per recipe'; const q=c.qty; if(c.unit==='g'&&q>=1000) return (Math.round(q/100)/10)+' kg'; if(c.unit==='ml'&&q>=1000) return (Math.round(q/100)/10)+' L'; return (Math.round(q*10)/10)+' '+(c.unit||''); }
+function topUp(gap){
+  const o=[{t:'25 g soya chunks in a sabzi',p:13},{t:'2 boiled eggs',p:12,egg:1},{t:'50 g paneer',p:9},{t:'1 glass milk',p:6},{t:'30 g roasted chana',p:6},{t:'150 g curd',p:5}].filter(x=>!x.egg||S.diet!=='veg');
+  const whey=(S.addons||[]).find(a=>a.id==='whey');
+  if(whey&&!whey.on&&gap>=15) o.unshift({t:'1 scoop whey',p:24});
+  const out=[]; let g=gap;
+  while(g>2&&out.length<2){ const pick=o.find(x=>x.p<=g+4&&!out.includes(x))||o.filter(x=>!out.includes(x)).slice(-1)[0]; out.push(pick); g-=pick.p; }
+  return out.map(x=>`${x.t} (+${x.p} g)`).join(' or ');
+}
+function vcSources(){
+  return VC_SRC.filter(x=>inSeason(x.id)||x.id==='lemon'||x.id==='papaya').map(x=>({...x,mg:Math.round(x.pc?x.pc*VC[x.id]:x.g*VC[x.id]/100)})).sort((a,b)=>b.mg-a.mg);
+}
+
+/* ---------- views ---------- */
+const ICON={
+ plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>',
+ shop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14l-1.5 12h-11z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>',
+ prep:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>',
+ season:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z"/><path d="M5 19l8-8"/></svg>',
+ setup:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>',
+ swap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 15a8 8 0 0 1-14 3l-2-2"/><path d="M20 4v4h-4M4 20v-4h4"/></svg>'
+};
+const TABS=[['plan','Week'],['shop','Groceries'],['prep','Prep'],['season','Season'],['setup','Setup']];
+function renderTabs(){document.getElementById('tabs').innerHTML=TABS.map(([id,l])=>`<button data-act="tab" data-tab="${id}" ${TAB===id?'aria-current="page"':''}>${ICON[id]}<span>${l}</span></button>`).join('');}
+function ring(pp,fp){
+  const C1=2*Math.PI*25,C2=2*Math.PI*17,a=Math.min(1,pp),b=Math.min(1,fp);
+  return `<svg class="ring" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Protein ${Math.round(pp*100)} percent, fibre ${Math.round(fp*100)} percent of target">
+  <circle cx="32" cy="32" r="25" fill="none" stroke="var(--protBg)" stroke-width="6"/>
+  <circle cx="32" cy="32" r="25" fill="none" stroke="var(--prot)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C1*a} ${C1}" transform="rotate(-90 32 32)"/>
+  <circle cx="32" cy="32" r="17" fill="none" stroke="var(--fibBg)" stroke-width="6"/>
+  <circle cx="32" cy="32" r="17" fill="none" stroke="var(--fib)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C2*b} ${C2}" transform="rotate(-90 32 32)"/>
+  <text x="32" y="36" text-anchor="middle" font-size="11" fill="var(--ink)">${Math.round(pp*100)}%</text></svg>`;
+}
+function banner(){
+  let h='';
+  if(!STORE_OK) h+=`<div class="banner warn"><span>This browser isn't saving your plan, so it changes on every visit. Open the link in Chrome itself (not inside WhatsApp or Instagram) and not in incognito.</span></div>`;
+  if(PENDING) h+=`<div class="banner"><span>The link you opened has an older plan than the one on this phone.</span><span style="display:flex;gap:6px"><button class="btn small" data-act="usepending">Use link's plan</button><button class="btn small ghost" data-act="keepmine">Keep mine</button></span></div>`;
+  if(P&&P.week){const end=new Date(P.week+'T00:00:00');end.setDate(end.getDate()+7); if(new Date()>=end) h+=`<div class="banner"><span>This plan was for the week of ${weekLabel(P.week)}.</span><button class="btn small" data-act="regen">Plan this week</button></div>`;}
+  if(DIRTY) h+=`<div class="banner"><span>Your changes apply to the next plan.</span><button class="btn small" data-act="regen">Make new plan</button></div>`;
+  return h;
+}
+
+function mealDetails(it,d,k){
+  const r=RX[it.rid], m=it.leftover?0:multFor(d,k), vc=vcOf(r,it);
+  const row=(lbl,f)=>`<tr><td>${lbl}</td><td>${Math.round(r.k*f)}</td><td>${Math.round(r.p*f)} g</td><td>${Math.round(r.f*f)} g</td><td>${Math.round((+r.c||0)*f)} g</td><td>${Math.round((+r.fat||0)*f)} g</td><td>${Math.round(vc*f)} mg</td></tr>`;
+  let h=`<div class="details"><h4>Nutrition per plate</h4><div style="overflow-x:auto"><table class="nut"><tr><th></th><th>kcal</th><th>Protein</th><th>Fibre</th><th>Carbs</th><th>Fat</th><th>Vit C</th></tr>${row(esc(S.a.name),S.a.f)}${row(esc(S.b.name),S.b.f)}</table></div>`;
+  if(it.leftover){h+=`<p class="note">Cooked as a double batch at last night's dinner. Pack it in the morning; nothing to cook.</p></div>`;return h;}
+  h+=`<h4>Ingredients for both of you${m>(S.a.f+S.b.f)/2+0.01?' (double batch, half for tomorrow\'s lunch)':''}</h4><ul>`;
+  if(r.custom) (r.ingC||[]).forEach(x=>{h+=`<li>${esc(x.name)}${x.qty!=null?': '+(Math.round(x.qty*m*10)/10)+' '+esc(x.unit):''}</li>`;});
+  else r.ing.forEach(([id,q])=>{const real=resolve(id,it);h+=`<li>${esc(ING[real].n)}: ${fmtQty(real,q*m)}</li>`;});
+  h+=`</ul><h4>How to make it, ${r.time} min</h4>${r.steps.length?`<ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:'<p class="note">Your own dish.</p>'}`;
+  h+=`<p class="note">Estimated cost: ₹${Math.round(costPerPlate(r,it)*m*2)} for this meal. Pantry spices not counted.</p>
+  <div class="row"><button class="btn small ${S.liked[r.id]?'':'ghost'}" data-act="like" data-id="${r.id}" aria-pressed="${!!S.liked[r.id]}">👍 ${S.liked[r.id]?'Liked, tap to undo':'We like this'}</button><button class="btn small ghost" data-act="block" data-d="${d}" data-k="${k}">👎 Don't suggest</button></div></div>`;
+  return h;
+}
+
+function renderPlan(){
+  const tA=targets(S.a),tB=targets(S.b);
+  const G=groceries(); let cost=G.customCost; Object.entries(G.tot).forEach(([id,q])=>cost+=priceOf(id,q)); G.adds.forEach(x=>cost+=x.cost);
+  const avgA={p:0,f:0,k:0,vc:0},avgB={p:0,f:0,k:0,vc:0}; let time=0; const distinct=new Set(), veg=new Set();
+  P.days.forEach(day=>{const t=dayMeals(day),A=personDay(t,'a'),B=personDay(t,'b');['p','f','k','vc'].forEach(x=>{avgA[x]+=A[x]/7;avgB[x]+=B[x]/7;});time+=t.time/7;
+    SLOTS.forEach(k=>{distinct.add(day[k].rid);if(day[k].veg)veg.add(day[k].veg);RX[day[k].rid].ing.forEach(([id])=>{if(ING[id]&&ING[id].cat==='veg'&&ING[id].m)veg.add(id);});});});
+  const pr=(v,t,u='g')=>`<span class="${v>=t*0.95?'ok':'short'}">${Math.round(v)}</span> / ${t} ${u}`;
+  const adA=activeAddons('a'),adB=activeAddons('b');
+  let h=banner()+`<section class="summary"><h2>Week of ${weekLabel(P.week)}</h2><p class="fine" style="margin:-6px 0 10px">The plan stays fixed until you tap New plan. Tap Share and send the link so you both see the same plan; share again after any change.</p>
+  <div class="sumgrid">
+   <div><b>₹${Math.round(cost/10)*10}</b><span>groceries for the week</span></div>
+   <div><b>${Math.round(cost/7/2)}</b><span>₹ per person per day</span></div>
+   <div><b>${Math.round(time)} min</b><span>cooking per day, average</span></div>
+   <div><b>${distinct.size} dishes</b><span>${veg.size} seasonal vegetables</span></div>
+  </div>
+  <div style="overflow-x:auto"><table class="persons"><tr><th>Daily average</th><th>Protein</th><th>Fibre</th><th>Vit C</th><th>kcal</th></tr>
+   <tr><td>${esc(S.a.name)}</td><td>${pr(avgA.p,tA.p)}</td><td>${pr(avgA.f,tA.f)}</td><td>${pr(avgA.vc,tA.vc,'mg')}</td><td>${Math.round(avgA.k)}</td></tr>
+   <tr><td>${esc(S.b.name)}</td><td>${pr(avgB.p,tB.p)}</td><td>${pr(avgB.f,tB.f)}</td><td>${pr(avgB.vc,tB.vc,'mg')}</td><td>${Math.round(avgB.k)}</td></tr>
+  </table></div>
+  ${adA.length||adB.length?`<p class="fine">Includes daily add-ons: ${[...new Set([...adA,...adB])].map(a=>esc(a.name.split(',')[0])+(a.who!=='both'?' ('+esc(S[a.who].name)+')':'')).join(', ')}.</p>`:''}
+  <p class="fine">Outer ring is ${esc(S.a.name)}'s protein, inner ring is fibre. Tap a meal for recipe, quantities and nutrition; tap the arrows to swap it.</p></section>`;
+  P.days.forEach((day,d)=>{
+    const t=dayMeals(day), A=personDay(t,'a'), B=personDay(t,'b');
+    h+=`<article class="day"><div class="dayhead">${ring(A.p/tA.p,A.f/tA.f)}<div><h3>${DAYS[d]}</h3>
+      <div class="sub">${esc(S.a.name)} ${Math.round(A.p)} g protein, ${Math.round(A.f)} g fibre, ${Math.round(A.vc)} mg vit C. ${esc(S.b.name)} ${Math.round(B.p)} g protein. About ${t.time} min in the kitchen.</div></div></div>`;
+    SLOTS.forEach(k=>{
+      const it=day[k], r=RX[it.rid], key=d+'-'+k, open=OPEN===key;
+      h+=`<div class="meal"><button class="meal-main" data-act="toggle" data-key="${key}" aria-expanded="${open}">
+        <span class="slot">${SLOTNAME[k]}</span><span class="mname">${esc(mealName(it))}</span>
+        <span class="mmeta"><span class="tag p">${r.p} g protein</span><span class="tag f">${r.f} g fibre</span><span class="tag ${it.leftover?'lo':''}">${it.leftover?'Leftover, no cooking':r.time+' min'}</span>${r.custom?'<span class="tag">Your dish</span>':''}${S.liked[r.id]?'<span class="tag">👍 Liked</span>':''}</span></button>
+        <button class="swap" data-act="swap" data-d="${d}" data-k="${k}" aria-label="Swap ${SLOTNAME[k]} on ${DAYS[d]}">${ICON.swap}</button>
+        ${open?mealDetails(it,d,k):''}</div>`;
+    });
+    const gap=Math.round(Math.max(tA.p-A.p,tB.p-B.p));
+    if(gap>4) h+=`<div class="hint">Protein short by about ${gap} g. Add ${topUp(gap)}.</div>`;
+    const fgap=Math.round(Math.max(tA.f-A.f,tB.f-B.f));
+    if(fgap>4){const fr=Object.keys(ING).filter(id=>ING[id].fruit&&inSeason(id))[0]; h+=`<div class="hint fib">Fibre short by about ${fgap} g. Add a ${fr?ING[fr].s:'fruit'} (+4 g) or 1 tbsp ground flaxseed (+3 g).</div>`;}
+    const vgap=Math.round(Math.max(tA.vc-A.vc,tB.vc-B.vc));
+    if(vgap>10){const src=vcSources(); const s1=src[0]; h+=`<div class="hint vc">Vitamin C short by about ${vgap} mg. ${s1?`Have ${s1.t} (~${s1.mg} mg)`:'Add a citrus fruit'}${src[1]?` or ${src[1].t} (~${src[1].mg} mg)`:''}.</div>`;}
+    h+=`</article>`;
+  });
+  return h;
+}
+
+function renderShop(){
+  const G=groceries(); const by={};
+  Object.entries(G.tot).forEach(([id,q])=>{(by[ING[id].cat]=by[ING[id].cat]||[]).push([id,q]);});
+  let total=G.customCost,need=G.customCost;
+  const links=term=>`<div class="shop"><a href="https://blinkit.com/s/?q=${term}" target="_blank" rel="noopener">Blinkit</a><a href="https://www.swiggy.com/instamart/search?custom_back=true&query=${term}" target="_blank" rel="noopener">Instamart</a></div>`;
+  let h=banner()+`<section class="section"><h2>Grocery list for the week</h2><p>Quantities cover both of you for all 7 days, including tomorrow's lunch batches. Tick what you already have. Prices are estimates; tap Blinkit or Instamart to see live prices and add to cart.</p>`;
+  Object.keys(CATS).forEach(cat=>{
+    if(!by[cat])return; h+=`<h3 class="gcat">${CATS[cat]}</h3>`;
+    by[cat].sort((a,b)=>ING[a[0]].n.localeCompare(ING[b[0]].n)).forEach(([id,q])=>{
+      const c=priceOf(id,q); total+=c; const have=!!CHECK[id]; if(!have) need+=c;
+      h+=`<div class="gitem ${have?'have':''}"><input type="checkbox" data-act="check" data-id="${id}" ${have?'checked':''} aria-label="I already have ${esc(ING[id].n)}">
+       <div><div class="gn">${esc(ING[id].n)}</div><div class="gq">${fmtQty(id,q)}, about ₹${Math.round(c)}</div></div>${links(encodeURIComponent(ING[id].q))}</div>`;
+    });
+  });
+  if(G.custom.length){h+=`<h3 class="gcat">For your own dishes</h3>`;
+    G.custom.forEach(c=>{const id='c:'+c.name.toLowerCase(); const have=!!CHECK[id];
+      h+=`<div class="gitem ${have?'have':''}"><input type="checkbox" data-act="check" data-id="${esc(id)}" ${have?'checked':''} aria-label="I already have ${esc(c.name)}"><div><div class="gn">${esc(c.name)}</div><div class="gq">${esc(fmtCustomQty(c))}</div></div>${links(encodeURIComponent(c.name))}</div>`;});}
+  if(G.adds.length){h+=`<h3 class="gcat">Daily add-ons</h3>`;
+    G.adds.forEach(({a,n,cost})=>{const id='a:'+a.id; const have=!!CHECK[id]; total+=cost; if(!have) need+=cost;
+      h+=`<div class="gitem ${have?'have':''}"><input type="checkbox" data-act="check" data-id="${esc(id)}" ${have?'checked':''} aria-label="I already have ${esc(a.name)}"><div><div class="gn">${esc(a.name.split(',')[0])}</div><div class="gq">${n} servings this week${a.g?' (about '+Math.round(n*a.g)+' g)':''}, about ₹${Math.round(cost)}</div></div>${links(encodeURIComponent(a.q||a.name))}</div>`;});}
+  h+=`<div class="gtotal"><span>Still to buy</span><b>₹${Math.round(need)}</b></div><p class="fine">Full list estimate ₹${Math.round(total)}. Leafy greens wilt fast, so buy them in two rounds: Sunday and Wednesday.</p>
+  <div class="row"><button class="btn" data-act="copy">Copy list</button><a class="btn ghost" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent(listText())}" target="_blank" rel="noopener">Send on WhatsApp</a></div></section>
+  <section class="section"><h2>Pantry check</h2><p>Not counted in cost. Make sure these are stocked:</p><div class="chips">${PANTRY.split(', ').map(x=>`<span class="chip">${x}</span>`).join('')}</div></section>`;
+  return h;
+}
+function listText(){
+  const G=groceries(); let t='Groceries for the week (2 people)\n';
+  Object.keys(CATS).forEach(cat=>{const items=Object.entries(G.tot).filter(([id])=>ING[id].cat===cat&&!CHECK[id]); if(!items.length)return; t+='\n'+CATS[cat]+'\n'; items.forEach(([id,q])=>t+=`- ${ING[id].n}: ${fmtQty(id,q)}\n`);});
+  const cu=G.custom.filter(c=>!CHECK['c:'+c.name.toLowerCase()]); if(cu.length){t+='\nFor our own dishes\n'; cu.forEach(c=>t+=`- ${c.name}: ${fmtCustomQty(c)}\n`);}
+  const ad=G.adds.filter(x=>!CHECK['a:'+x.a.id]); if(ad.length){t+='\nAdd-ons\n'; ad.forEach(x=>t+=`- ${x.a.name.split(',')[0]}: ${x.n} servings\n`);}
+  return t;
+}
+
+function renderPrep(){
+  const days=P.days, nights={};
+  const add=(dd,txt)=>{(nights[dd]=nights[dd]||[]).push(txt);};
+  for(let d=0;d<7;d++) SLOTS.forEach(k=>{
+    const it=days[d][k]; if(it.leftover)return; const r=RX[it.rid]; if(!r.soak)return;
+    const q=(r.ing.find(x=>x[0]===r.soak.id)||[0,0])[1]*multFor(d,k);
+    const nm=ING[r.soak.id].n.toLowerCase(), who=`for ${DAYS[d]}'s ${SLOTNAME[k].toLowerCase()}`;
+    if(r.soak.type==='soak') add(Math.max(d-1,-1),`Soak ${fmtQty(r.soak.id,q)} ${nm} ${r.soak.txt}, ${who}`);
+    if(r.soak.type==='marinate') add(Math.max(d-1,-1),`Marinate ${fmtQty(r.soak.id,q)} chicken in curd, lemon and tikka spices, ${who}`);
+    if(r.soak.type==='oats') add(Math.max(d-1,-1),`Mix oats, milk and chia in two jars, ${who}`);
+    if(r.soak.type==='sprout') add(Math.max(d-2,-1),`Soak ${fmtQty(r.soak.id,q)} whole moong; next morning drain and keep covered to sprout, ${who}`);
+  });
+  if(S.addons.some(a=>a.on&&a.id==='almond')) add(-1,'Soak almonds every night for the next morning');
+  const nightLbl=i=>i===-1?'Sunday night (before Monday)':(DAYS[i]+' night');
+  let nightsHtml=''; [-1,0,1,2,3,4,5].forEach(i=>{ if(nights[i]) nightsHtml+=`<li><span class="when">${nightLbl(i)}, 5 min</span>${nights[i].map(t=>`<b>${esc(t)}</b>`).join('')}</li>`; });
+  let roti=0,curry=0,chutney=false,nuts=false,curd=0,tuber=false;
+  days.forEach((day,d)=>SLOTS.forEach(k=>{const it=day[k]; if(it.leftover)return; const r=RX[it.rid]; const ids=r.ing.map(x=>x[0]);
+    if(ids.some(x=>['atta','mgatta'].includes(x))&&d<2) roti++;
+    if(r.slot==='m'&&ids.includes('onion')&&ids.includes('tomato')) curry++;
+    if(ids.includes('mint')) chutney=true; if(ids.includes('makhana')||ids.includes('rchana')) nuts=true; if(ids.includes('curd')) curd++; if(ids.includes('shakarkandi')||ids.includes('bhutta')) tuber=true;}));
+  const batch=[];
+  if(curry>=2) batch.push(['Onion-tomato masala base, 20 min',`Cook down about ${Math.max(4,curry)} onions and ${Math.max(5,curry+1)} tomatoes with ginger-garlic and spices. Keeps 5 days in the fridge and saves about 10 minutes on each of this week's ${curry} curries.`]);
+  batch.push(['Ginger-garlic paste, 5 min','Blend a small jar. Every dal and curry uses it.']);
+  if(roti) batch.push(['Dough for Monday and Tuesday, 10 min','Knead atta once, store in an airtight box. Fresh rotis in 10 minutes each evening.']);
+  batch.push(['Wash and chop vegetables for Mon to Wed, 15 min','Store in boxes lined with a paper towel. Chopping is the real time-killer on weekdays.']);
+  if(chutney) batch.push(['Mint-coriander chutney, 5 min','Lasts 4 days and lifts chillas, wraps and salads.']);
+  if(tuber) batch.push(['Boil shakarkandi or bhutta, 15 min','One cooker batch covers 2 to 3 evening snacks.']);
+  if(nuts) batch.push(['Snack jars, 10 min','Roast makhana and peanuts, refill roasted chana. Grab-and-go for office.']);
+  if(curd>=3) batch.push(['Set curd every night','This week uses curd in '+curd+' meals. Homemade is cheaper and thicker than packets.']);
+  const tips=[
+   ['Cook once, eat twice','With leftover mode on, dinner is a double batch and becomes the next day\'s tiffin. You cook 2 meals a day instead of 3.'+(S.leftover?' It is on.':' Turn it on in Setup.')],
+   ['Pot-in-pot in the cooker','Dal at the bottom, rice in a steel dabba on top. One whistle cycle, two dishes.'],
+   ['Split the work','One person chops while the other cooks. A 30-minute dinner drops to about 18.'],
+   ['Lock in breakfasts','Keep 3 or 4 breakfasts on repeat. Variety matters more at lunch and dinner.'],
+   ['Shop once, top up once','Big order on Sunday, a small greens and curd top-up on Wednesday.']
+  ];
+  return `<section class="section"><h2>Night-before list</h2><p>Small tasks so the morning is easy. Set a phone reminder at 10 pm.</p><ul class="steps">${nightsHtml||'<li>Nothing to soak this week.</li>'}</ul></section>
+  <section class="section"><h2>Sunday batch prep, about an hour</h2><p>Done in this order, it covers most of the week's slow work.</p><ol class="steps">${batch.map(([a,b])=>`<li><b>${a}</b>${esc(b)}</li>`).join('')}</ol></section>
+  <section class="section"><h2>Keeping it from becoming a chore</h2><ul class="steps">${tips.map(([a,b])=>`<li><b>${a}</b>${esc(b)}</li>`).join('')}</ul></section>`;
+}
+
+function renderSeason(){
+  const used=new Set(); P.days.forEach(day=>SLOTS.forEach(k=>{const it=day[k]; if(it.veg)used.add(it.veg); if(it.fruit)used.add(it.fruit); RX[it.rid].ing.forEach(([id])=>used.add(id));}));
+  const seasonal=cat=>Object.keys(ING).filter(id=>ING[id].m&&ING[id].cat===cat&&ING[id].m.length<12);
+  const chip=id=>{const pf=S.prefs[id]; return `<button class="chip ${pf===1?'fav':pf===-1?'skip':used.has(id)?'used':''}" data-act="pref" data-id="${id}" aria-label="${esc(ING[id].n)}: ${pf===1?'more often':pf===-1?'skipped':'normal'}">${pf===1?'★ ':''}${esc(ING[id].n)}</button>`;};
+  const inM=cat=>seasonal(cat).filter(id=>ING[id].m.includes(S.month));
+  const outM=cat=>seasonal(cat).filter(id=>!ING[id].m.includes(S.month));
+  const src=vcSources();
+  return banner()+`<section class="section"><h2>In season: ${MONTHS[S.month-1]}</h2><p>North India calendar. Tap an item once to get it more often (★), again to skip it, a third time to reset. Green ones are in this week's plan.</p>
+   <div class="field"><label for="mon2">Month</label><select id="mon2" data-set="month">${MONTHS.map((m,i)=>`<option value="${i+1}" ${S.month===i+1?'selected':''}>${m}</option>`).join('')}</select></div>
+   <h3 class="gcat">Vegetables and greens</h3><div class="chips">${inM('veg').map(chip).join('')}</div>
+   <h3 class="gcat">Fruits</h3><div class="chips">${inM('fruit').map(chip).join('')}</div>
+   <details class="more"><summary>Getting something locally that isn't listed here?</summary><p class="fine">Star it and the planner treats it as in season for you.</p><div class="chips">${outM('veg').concat(outM('fruit')).map(chip).join('')}</div></details>
+   <p class="fine">Papaya and banana are available all year and fill gaps.</p></section>
+  <section class="section"><h2>Best vitamin C sources this month</h2><p>Daily need is about 80 mg for men and 65 mg for women. Eat these raw; cooking destroys a good part of it.</p>
+   <ul class="steps">${src.slice(0,5).map(x=>`<li><b>${esc(x.t)}</b><span class="when">about ${x.mg} mg</span></li>`).join('')}</ul>
+   ${!inSeason('amla')?`<p class="fine">Amla is out of season. Frozen amla, amla powder or a sugar-free amla juice work too; murabba has too much sugar to count.</p>`:''}</section>`;
+}
+
+function personForm(key){
+  const p=S[key];
+  return `<div class="person"><h3>${key==='a'?'Person 1':'Person 2'}</h3>
+   <div class="two"><div class="field"><label>Name</label><input data-set="${key}.name" value="${esc(p.name)}"></div>
+   <div class="field"><label>Weight (kg)</label><input type="number" inputmode="numeric" min="30" max="200" data-set="${key}.w" data-num value="${p.w}"></div></div>
+   <div class="field"><label>Goal</label><select data-set="${key}.g" data-num>
+     <option value="1" ${p.g==1?'selected':''}>Basic health (1.0 g protein per kg)</option>
+     <option value="1.2" ${p.g==1.2?'selected':''}>Stay fit and active (1.2 g per kg)</option>
+     <option value="1.6" ${p.g==1.6?'selected':''}>Lose fat or build muscle (1.6 g per kg)</option></select></div>
+   <div class="three"><div class="field"><label>Fibre g/day</label><input type="number" inputmode="numeric" min="15" max="50" data-set="${key}.fib" data-num value="${p.fib}"></div>
+   <div class="field"><label>Vit C mg/day</label><input type="number" inputmode="numeric" min="40" max="200" data-set="${key}.vc" data-num value="${p.vc}"></div>
+   <div class="field"><label>Portion</label><select data-set="${key}.f" data-num>${[0.7,0.8,0.9,1,1.1,1.2,1.3].map(v=>`<option value="${v}" ${p.f==v?'selected':''}>${v}×</option>`).join('')}</select></div></div>
+   <p class="fine">Protein target: ${targets(p).p} g a day.</p></div>`;
+}
+function addonRow(a,i){
+  const paused=a.m&&!a.m.includes(S.month);
+  return `<div class="addon"><input type="checkbox" data-set="addons.${i}.on" ${a.on?'checked':''} aria-label="Use ${esc(a.name)}">
+   <div><div><b>${esc(a.name)}</b></div><div class="am">${a.p} g protein, ${a.f} g fibre, ${a.vc} mg vit C, about ₹${a.cost} each${paused?'. Out of season this month, paused':''}</div></div>
+   <button class="linkbtn" data-act="deladdon" data-i="${i}">Remove</button>
+   <div class="ctl"><select data-set="addons.${i}.per" data-num aria-label="Servings per day">${[1,2,3].map(v=>`<option value="${v}" ${a.per==v?'selected':''}>${v} a day</option>`).join('')}</select>
+   <select data-set="addons.${i}.who" aria-label="Who takes it"><option value="both" ${a.who==='both'?'selected':''}>Both</option><option value="a" ${a.who==='a'?'selected':''}>${esc(S.a.name)}</option><option value="b" ${a.who==='b'?'selected':''}>${esc(S.b.name)}</option></select></div></div>`;
+}
+function renderRatings(){
+  const nm=r=>r.name.replace('{veg}','seasonal').replace('{fruit}','fruit');
+  const groups=[['b','Breakfast'],['m','Lunch and dinner'],['s','Snacks']];
+  let h=`<section class="section"><h2>Dishes you like or skip</h2><p>👍 shows up more often, 👎 never shows up. Tap the middle option to undo. Changes apply to the next plan.</p>`;
+  groups.forEach(([slot,lbl])=>{
+    const list=ALLR.filter(r=>r.slot===slot&&dietOK(r,S.diet)); if(!list.length) return;
+    h+=`<details class="more"><summary>${lbl} (${list.length})</summary>`;
+    list.forEach(r=>{const v=S.blocked[r.id]?-1:S.liked[r.id]?1:0;
+      h+=`<div class="rate"><span>${esc(nm(r))}</span><div class="seg">${[[1,'👍'],[0,'Okay'],[-1,'👎']].map(([x,l])=>`<button data-act="rate" data-id="${r.id}" data-v="${x}" aria-pressed="${v===x}" aria-label="${esc(nm(r))}: ${l}">${l}</button>`).join('')}</div></div>`;});
+    h+=`</details>`;
+  });
+  return h+`</section>`;
+}
+function renderSetup(){
+  const seg=(k,opts)=>`<div class="seg">${opts.map(([v,l])=>`<button data-act="seg" data-k="${k}" data-v="${v}" aria-pressed="${String(S[k])===String(v)}">${l}</button>`).join('')}</div>`;
+  const mopts=sel=>MONTHS.map((m,i)=>`<option value="${i+1}" ${sel===i+1?'selected':''}>${m}</option>`).join('');
+  const blocked=Object.keys(S.blocked).filter(id=>S.blocked[id]&&RX[id]);
+  return banner()+`<section class="section"><h2>Your kitchen</h2><p>Changes to diet, month, time or leftovers make a fresh plan.</p>
+   <div class="field"><label>Food preference</label>${seg('diet',[['veg','Veg'],['egg','Veg + eggs'],['nonveg','Non-veg']])}</div>
+   <div class="field"><label>Max cooking time per meal on weekdays</label>${seg('cap',[[20,'20 min'],[30,'30 min'],[45,'45 min']])}</div>
+   <div class="field"><label for="mon1">Month (for seasonal produce)</label><select id="mon1" data-set="month" data-num>${mopts(S.month)}</select></div>
+   <div class="field"><label for="sv">Priority</label><input id="sv" type="range" min="0" max="1" step="0.1" data-set="save" data-num value="${S.save}"><div class="rangelbl"><span>More variety</span><span>Lower cost</span></div></div>
+   <label class="switch"><span>Leftover mode: dinner doubles as next day's lunch</span><input type="checkbox" data-set="leftover" ${S.leftover?'checked':''}></label>
+  </section>
+  <section class="section"><h2>The two of you</h2><p>Portion size scales quantities and nutrition for each person.</p>${personForm('a')}${personForm('b')}</section>
+  <section class="section"><h2>Daily add-ons</h2><p>Things you take every day on top of meals: whey, amla, nuts, seeds. They count toward each person's protein, fibre and vitamin C, and appear in the grocery list.</p>
+   ${S.addons.map(addonRow).join('')||'<p class="fine">No add-ons yet.</p>'}
+   <details class="more"><summary>Add your own</summary>
+    <div class="field"><label>Name and serving</label><input id="ad_name" placeholder="e.g. Plant protein, 1 scoop"></div>
+    <div class="three"><div class="field"><label>Protein g</label><input id="ad_p" type="number" inputmode="decimal" value="0"></div><div class="field"><label>Fibre g</label><input id="ad_f" type="number" inputmode="decimal" value="0"></div><div class="field"><label>Vit C mg</label><input id="ad_vc" type="number" inputmode="decimal" value="0"></div></div>
+    <div class="three"><div class="field"><label>kcal</label><input id="ad_k" type="number" inputmode="decimal" value="0"></div><div class="field"><label>₹ per serving</label><input id="ad_cost" type="number" inputmode="decimal" value="0"></div><div class="field"><label>Who</label><select id="ad_who"><option value="both">Both</option><option value="a">${esc(S.a.name)}</option><option value="b">${esc(S.b.name)}</option></select></div></div>
+    <button class="btn" data-act="addaddon">Add to daily add-ons</button></details>
+  </section>
+  <section class="section"><h2>Your own dishes</h2><p>Add something you already cook, like maa ke haath ka kadhi. The planner will mix it into the rotation.</p>
+   ${S.custom.map((c,i)=>`<div class="addon" style="grid-template-columns:1fr auto"><div><b>${esc(c.name)}</b><div class="am">${({b:'Breakfast',m:'Lunch or dinner',s:'Snack'})[c.slot]}, ${c.p} g protein, ${c.f} g fibre, ${c.time} min</div></div><button class="linkbtn" data-act="delcustom" data-i="${i}">Remove</button></div>`).join('')}
+   <details class="more"><summary>Add a dish</summary>
+    <div class="field"><label>Dish name</label><input id="cd_name" placeholder="e.g. Kadhi with brown rice"></div>
+    <div class="two"><div class="field"><label>Meal</label><select id="cd_slot"><option value="m">Lunch or dinner</option><option value="b">Breakfast</option><option value="s">Snack</option></select></div>
+    <div class="field"><label>Type</label><select id="cd_diet"><option value="veg">Veg</option><option value="egg">Has eggs</option><option value="nonveg">Non-veg</option></select></div></div>
+    <p class="fine">Per plate for one person. Rough numbers are fine; packet labels or any nutrition app help.</p>
+    <div class="three"><div class="field"><label>Protein g</label><input id="cd_p" type="number" inputmode="decimal" value="15"></div><div class="field"><label>Fibre g</label><input id="cd_f" type="number" inputmode="decimal" value="6"></div><div class="field"><label>kcal</label><input id="cd_k" type="number" inputmode="decimal" value="450"></div></div>
+    <div class="three"><div class="field"><label>Minutes</label><input id="cd_time" type="number" inputmode="numeric" value="30"></div><div class="field"><label>₹ per plate</label><input id="cd_cost" type="number" inputmode="decimal" value="40"></div><div class="field"><label>Vit C mg</label><input id="cd_vc" type="number" inputmode="decimal" value="10"></div></div>
+    <div class="two"><div class="field"><label>Available from</label><select id="cd_m1"><option value="0">All year</option>${mopts(-1)}</select></div><div class="field"><label>Until</label><select id="cd_m2"><option value="0">All year</option>${mopts(-1)}</select></div></div>
+    <div class="field"><label>Ingredients for 2 plates, one per line</label><textarea id="cd_ing" placeholder="Besan, 60 g&#10;Curd, 400 g&#10;Rice, 100 g"></textarea></div>
+    <div class="field"><label>Steps (optional, one per line)</label><textarea id="cd_steps"></textarea></div>
+    <button class="btn" data-act="addcustom">Add dish</button></details>
+  </section>
+  ${renderRatings()}
+  <section class="section"><h2>About the numbers</h2><p class="fine" style="margin:0">Nutrition values are estimates for home-style cooking with about 1 to 1.5 tsp oil per dish; vitamin C allows for cooking losses. Prices are approximate city rates; check live prices in the apps. With whey, total daily protein above about 2 g per kg adds little. If either of you has a kidney or other medical condition, run the targets past a doctor or dietitian.</p></section>`;
+}
+
+function render(){
+  renderTabs();
+  document.getElementById('subtitle').textContent=`${MONTHS[S.month-1]} plan for ${S.a.name} and ${S.b.name}, ${S.diet==='veg'?'vegetarian':S.diet==='egg'?'veg with eggs':'non-veg'}`;
+  const v=document.getElementById('view');
+  v.innerHTML=TAB==='plan'?renderPlan():TAB==='shop'?renderShop():TAB==='prep'?renderPrep():TAB==='season'?renderSeason():renderSetup();
+}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>el.classList.remove('show'),1800);}
+
+/* ---------- events ---------- */
+const val=id=>document.getElementById(id).value;
+const num=id=>parseFloat(val(id))||0;
+function setPath(path,v){const ks=path.split('.');let o=S;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];o[ks[ks.length-1]]=v;}
+const REGEN_KEYS=['diet','month','cap','leftover'];
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b)return; const a=b.dataset.act;
+  if(a==='tab'){TAB=b.dataset.tab;OPEN=null;render();window.scrollTo(0,0);}
+  else if(a==='regen'){if(!confirm('Replace the current week\'s plan with a new one?'))return;generate();render();toast('New plan ready. Tap Share to send it');}
+  else if(a==='share'){share();}
+  else if(a==='usepending'){applyShared(PENDING);PENDING=null;render();toast('Shared plan loaded');}
+  else if(a==='keepmine'){PENDING=null;render();}
+  else if(a==='like'){const id=b.dataset.id;if(S.liked[id])delete S.liked[id];else{S.liked[id]=true;delete S.blocked[id];}save();render();toast(S.liked[id]?'Will show up more often':'Like removed');}
+  else if(a==='rate'){const id=b.dataset.id,v=+b.dataset.v;delete S.liked[id];delete S.blocked[id];if(v===1)S.liked[id]=true;if(v===-1)S.blocked[id]=true;DIRTY=true;save();render();}
+  else if(a==='toggle'){OPEN=OPEN===b.dataset.key?null:b.dataset.key;render();}
+  else if(a==='swap'){swap(+b.dataset.d,b.dataset.k);}
+  else if(a==='block'){const d=+b.dataset.d,k=b.dataset.k;const rid=P.days[d][k].rid;S.blocked[rid]=true;delete S.liked[rid];OPEN=null;swap(d,k,true);toast('Dish skipped and replaced');}
+  else if(a==='unblock'){delete S.blocked[b.dataset.id];DIRTY=true;save();render();}
+  else if(a==='pref'){const id=b.dataset.id,c=S.prefs[id];if(c===undefined)S.prefs[id]=1;else if(c===1)S.prefs[id]=-1;else delete S.prefs[id];DIRTY=true;save();render();}
+  else if(a==='seg'){const k=b.dataset.k;let v=b.dataset.v;if(k==='cap')v=+v;S[k]=v;generate();render();toast('Plan updated');}
+  else if(a==='deladdon'){S.addons.splice(+b.dataset.i,1);save();render();}
+  else if(a==='addaddon'){const name=val('ad_name').trim(); if(!name){toast('Give the add-on a name');return;}
+    S.addons.push({id:'u'+Date.now(),name,p:num('ad_p'),f:num('ad_f'),vc:num('ad_vc'),k:num('ad_k'),cost:num('ad_cost'),who:val('ad_who'),per:1,on:true,q:name.split(',')[0]});save();render();toast('Add-on added');}
+  else if(a==='delcustom'){const c=S.custom.splice(+b.dataset.i,1)[0];buildRecipes();if(P.days.some(day=>SLOTS.some(k=>day[k].rid===c.id)))generate();save();render();}
+  else if(a==='addcustom'){const name=val('cd_name').trim(); if(!name){toast('Give the dish a name');return;}
+    const m1=+val('cd_m1'),m2=+val('cd_m2');
+    S.custom.push({id:'c'+Date.now(),name,slot:val('cd_slot'),diet:val('cd_diet'),p:num('cd_p'),f:num('cd_f'),k:num('cd_k'),c:0,fat:0,time:num('cd_time')||20,cost:num('cd_cost'),vc:num('cd_vc'),
+      m:m1&&m2?R(m1,m2):null, ingC:val('cd_ing').split('\n').filter(x=>x.trim()).map(parseIng), steps:val('cd_steps').split('\n').filter(x=>x.trim())});
+    buildRecipes();DIRTY=true;save();render();toast('Dish added');}
+  else if(a==='copy'){const t=listText();
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>toast('List copied'),()=>fallbackCopy(t));} else fallbackCopy(t);}
+});
+function fallbackCopy(t){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('List copied');}catch(e){toast('Copy failed, select manually');}ta.remove();}
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.act==='check'){CHECK[t.dataset.id]=t.checked;save();render();return;}
+  const path=t.dataset.set; if(!path)return;
+  let v=t.type==='checkbox'?t.checked:t.value;
+  if(t.hasAttribute('data-num')) v=parseFloat(v)||0;
+  setPath(path,v);
+  if(REGEN_KEYS.includes(path)){generate();toast('Plan updated');} else save();
+  render();
+});
+
+load(); render(); checkHash();
+</script>
+</body>
+</html>
